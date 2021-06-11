@@ -11,7 +11,10 @@ path = str(pathlib.Path.home()) + '/komodo/src/'
 
 # Object, which will be moved to another thread
 class RpcWorker(QObject):
+    # This defines a signal called 'commandInsert' that takes
+    # one string argument.
     commandInsert = pyqtSignal(str)
+    finished = pyqtSignal()
 
     def __init__(self):
         super().__init__()
@@ -21,7 +24,14 @@ class RpcWorker(QObject):
     def set_command(self, cmd):
         self.command = cmd
 
-    def execute_command(self):
+    @pyqtSlot()
+    def do_execute_command(self):
+        print(f'Beginning executing command: {self.command}')
+        self._execute_command()
+        self.finished.emit()
+
+    def _execute_command(self):
+        print("inside execute command")
         proc = subprocess.Popen(self.command, cwd=path, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         stdout = ""
         while True:
@@ -78,7 +88,7 @@ class Deneme(QtWidgets.QMainWindow, Ui_MainWindow):
         rpcthread.start()
         rpcworker.moveToThread(rpcthread)
         rpcworker.commandInsert.connect(self.setresult)
-        rpcthread.started.connect(rpcworker.execute_command)
+        rpcthread.started.connect(rpcworker.do_execute_command)
 
     @pyqtSlot(str)
     def setresult(self, out):
