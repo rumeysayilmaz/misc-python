@@ -77,6 +77,8 @@ class Deneme(QtWidgets.QMainWindow, Ui_MainWindow):
         # connect started signal to run method of object in another thread
         self.mythread.started.connect(self.myworker.axaa)
 
+	# TODO: move thread and object initialization here
+
     @pyqtSlot(int)
     def percentage_progress(self, count):
         self.progressBar.setValue(count)
